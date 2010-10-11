@@ -1,7 +1,7 @@
 # A Slug is a unique, human-friendly identifier for an ActiveRecord.
 class Slug < ::ActiveRecord::Base
   attr_writer :sluggable
-  attr_accessible :name, :scope, :sluggable, :sequence
+  attr_accessible :name, :scope, :sluggable, :sequence, :locale
   def self.named_scope(*args, &block) scope(*args, &block) end if FriendlyId.on_ar3?
   table_name = "slugs"
   before_save :enable_name_reversion, :set_sequence
@@ -14,6 +14,7 @@ class Slug < ::ActiveRecord::Base
       :order => "sequence ASC"
     }
   }
+  named_scope :with_locale, lambda {|loc| { :conditions => { :locale => loc } }}
 
   def sluggable
     sluggable_id && !@sluggable and begin
@@ -50,7 +51,7 @@ class Slug < ::ActiveRecord::Base
   # If we're renaming back to a previously used friendly_id, delete the
   # slug so that we can recycle the name without having to use a sequence.
   def enable_name_reversion
-    sluggable.slugs.find_all_by_name_and_scope(name, scope).each { |slug| slug.destroy }
+    sluggable.slugs.find_all_by_name_and_scope_and_locale(name, scope, locale).each { |slug| slug.destroy }
   end
 
   def friendly_id_with_sequence

@@ -11,7 +11,7 @@ module FriendlyId
           end
 
           assert_nothing_raised do
-            klass.find(instance.friendly_id, :include => :slug)
+            klass.find(instance.friendly_id) # , :include => :slug)
           end
         end
 

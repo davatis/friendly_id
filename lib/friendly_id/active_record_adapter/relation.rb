@@ -113,6 +113,9 @@ module FriendlyId
               "slugs.scope IS NULL AND (%s)" % [conditions]
             end
           end
+          # TODO mal refactorn in arel
+          locale = I18n.locale
+          conditions = "slugs.locale = %s AND (%s)" % [connection.quote(locale), conditions]
           sql = "SELECT sluggable_id FROM slugs WHERE (%s)" % conditions
           connection.select_values sql
         end

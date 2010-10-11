@@ -5,17 +5,51 @@ module FriendlyId
       def self.included(base)
         base.class_eval do
           has_many :slugs, :order => 'id DESC', :as => :sluggable, :dependent => :destroy
-          has_one :slug, :order => 'id DESC', :as => :sluggable, :dependent => :destroy
-          before_save :build_a_slug
+          # deaktiviert wegen i18n
+          #has_one :slug, :order => 'id DESC', :as => :sluggable, :dependent => :destroy
+          before_save :save_slugs
           after_save :set_slug_cache
           after_update :update_scope
           after_update :update_dependent_scopes
           protect_friendly_id_attributes
           extend FriendlyId::ActiveRecordAdapter::Finders unless FriendlyId.on_ar3?
+          define_method("#{friendly_id_config.method}=") do |*args|
+            p 'setter'
+            super
+            build_a_slug # if args[0] == friendly_id_config.method.to_s
+          end
         end
       end
 
       include FriendlyId::Slugged::Model
+
+      def locale
+        I18n.locale
+      end
+
+
+      def write_attribute *args
+        p 'write attribute'
+        p args
+        p friendly_id_config.method
+        super *args
+        if args[0].to_s == friendly_id_config.method.to_s
+          @value = args[1]
+          build_a_slug 
+        end
+      end
+
+      def slug
+        p 'method :slug in slugged_model'
+        @slug ||= {}
+        p @slug
+        p slugs
+        p slugs.with_locale(locale)
+        (@slug && @slug[locale]) || @slug[locale] = slugs.with_locale(locale).first
+        p @slug
+        p "returning #{@slug[locale]} as slug"
+        @slug[locale]
+      end
 
       def find_slug(name, sequence)
         slugs.find_by_name_and_sequence(name, sequence)
@@ -45,10 +79,35 @@ module FriendlyId
 
       # Build the new slug using the generated friendly id.
       def build_a_slug
+        p' build a slug'
         return unless new_slug_needed?
-        @slug = slugs.build :name => slug_text.to_s, :scope => friendly_id_config.scope_for(self),
-          :sluggable => self
-        @new_friendly_id = @slug.to_friendly_id
+        p 'new slug needed'
+        raise "steht schon was anderes drin #{@slug.inspect} - #{locale}" if @slug != nil && !@slug.kind_of?(Hash)
+        @slug ||= {} #if @slug == nil
+        p slug_text
+        p self
+        @slug[locale] = slugs.build :name => slug_text.to_s, :scope => friendly_id_config.scope_for(self),
+          :sluggable => self, :locale => locale
+        #raise @slug.inspect
+        #p @slug
+        #raise locale.inspect
+        #raise @slug[locale].inspect
+        @new_friendly_id = @slug[locale].to_friendly_id
+      end
+
+      def save_slugs
+        p 'save slugs'
+        if @slug && @slug.kind_of?( Hash )
+          p @slug
+          @slug.each do |k, v|
+            p "nil #{k} => #{v}" unless v
+            if v
+              v.sluggable = self
+              v.save!
+            end
+          end
+        end
+        true
       end
 
       # Reset the cached friendly_id?

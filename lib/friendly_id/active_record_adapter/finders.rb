@@ -25,6 +25,10 @@ module FriendlyId
           @scope_val = @scope_val.to_param if @scope_val && @scope_val.respond_to?(:to_param)
         end
 
+        def locale
+          I18n.locale
+        end
+
         def find_one
           return find_one_with_cached_slug if !fc.scope? && cache_column?
           return find_one_with_slug if use_slugs?
@@ -65,6 +69,7 @@ module FriendlyId
           name, seq = id.to_s.parse_friendly_id
           scope = scoped(:joins => :slugs, :conditions => {:slugs => {:name => name, :sequence => seq}})
           scope = scope.scoped(:conditions => {:slugs => {:scope => scope_val}}) if fc.scope?
+          scope = scope.scoped(:conditions => { :slugs => { :locale => locale }})
           options[:readonly] = false unless options[:readonly]
           @result = scope.first(options)
           assign_status
