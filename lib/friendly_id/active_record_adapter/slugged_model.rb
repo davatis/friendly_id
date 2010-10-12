@@ -14,7 +14,7 @@ module FriendlyId
           protect_friendly_id_attributes
           extend FriendlyId::ActiveRecordAdapter::Finders unless FriendlyId.on_ar3?
           define_method("#{friendly_id_config.method}=") do |*args|
-            p 'setter'
+            #p 'setter'
             super
             build_a_slug # if args[0] == friendly_id_config.method.to_s
           end
@@ -29,9 +29,9 @@ module FriendlyId
 
 
       def write_attribute *args
-        p 'write attribute'
-        p args
-        p friendly_id_config.method
+        #p 'write attribute'
+        #p args
+        #p friendly_id_config.method
         super *args
         if args[0].to_s == friendly_id_config.method.to_s
           @value = args[1]
@@ -40,19 +40,19 @@ module FriendlyId
       end
 
       def slug
-        p 'method :slug in slugged_model'
+        #p 'method :slug in slugged_model'
         @slug ||= {}
-        p @slug
-        p slugs
-        p slugs.with_locale(locale)
+        #p @slug
+        #p slugs
+        #p slugs.with_locale(locale)
         (@slug && @slug[locale]) || @slug[locale] = slugs.with_locale(locale).first
-        p @slug
-        p "returning #{@slug[locale]} as slug"
+        #p @slug
+        #p "returning #{@slug[locale]} as slug"
         @slug[locale]
       end
 
       def find_slug(name, sequence)
-        slugs.find_by_name_and_sequence(name, sequence)
+        slugs.find_by_name_and_sequence_and_locale(name, sequence, locale)
       end
 
       # Returns the friendly id, or if none is available, the numeric id. Note that this
@@ -79,13 +79,13 @@ module FriendlyId
 
       # Build the new slug using the generated friendly id.
       def build_a_slug
-        p' build a slug'
+        #p' build a slug'
         return unless new_slug_needed?
-        p 'new slug needed'
+        #p 'new slug needed'
         raise "steht schon was anderes drin #{@slug.inspect} - #{locale}" if @slug != nil && !@slug.kind_of?(Hash)
         @slug ||= {} #if @slug == nil
-        p slug_text
-        p self
+        #p slug_text
+        #p self
         @slug[locale] = slugs.build :name => slug_text.to_s, :scope => friendly_id_config.scope_for(self),
           :sluggable => self, :locale => locale
         #raise @slug.inspect
@@ -96,13 +96,14 @@ module FriendlyId
       end
 
       def save_slugs
-        p 'save slugs'
+        #p 'save slugs'
         if @slug && @slug.kind_of?( Hash )
-          p @slug
+          #p @slug
           @slug.each do |k, v|
-            p "nil #{k} => #{v}" unless v
-            if v
+            #p "nil #{k} => #{v}" unless v
+            if v && v.new_record?
               v.sluggable = self
+              #p "saving slug #{v.name}"
               v.save!
             end
           end

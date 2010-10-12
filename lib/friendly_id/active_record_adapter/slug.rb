@@ -51,7 +51,8 @@ class Slug < ::ActiveRecord::Base
   # If we're renaming back to a previously used friendly_id, delete the
   # slug so that we can recycle the name without having to use a sequence.
   def enable_name_reversion
-    sluggable.slugs.find_all_by_name_and_scope_and_locale(name, scope, locale).each { |slug| slug.destroy }
+    sluggable.slugs.find_all_by_name_and_scope_and_locale(name, scope, locale).each { |slug| slug.destroy unless slug == self }
+    true
   end
 
   def friendly_id_with_sequence
