@@ -9,7 +9,8 @@ class Slug < ::ActiveRecord::Base
   named_scope :similar_to, lambda {|slug| {:conditions => {
         :name           => slug.name,
         :scope          => slug.scope,
-        :sluggable_type => slug.sluggable_type
+        :sluggable_type => slug.sluggable_type,
+        :locale => slug.locale
       },
       :order => "sequence ASC"
     }
