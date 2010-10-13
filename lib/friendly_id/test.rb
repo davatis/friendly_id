@@ -168,13 +168,13 @@ module FriendlyId
 
       test "should not make a new slug unless the friendly_id method value has changed" do
         debugger
-        p 'hier'
-        p instance.slugs
-        p instance.slugs.size
+        #p 'hier'
+        #p instance.slugs
+        #p instance.slugs.size
         instance.note = instance.note.to_s << " updated"
         debugger
         instance.send save_method
-        p instance.slugs
+        #p instance.slugs
         assert_equal 1, instance.slugs.size
       end
 
