@@ -27,7 +27,8 @@ module FriendlyId
       :max_length                  => 255,
       :reserved_words              => ["index", "new"],
       :reserved_message            => 'can not be "%s"',
-      :sequence_separator          => "--"
+      :sequence_separator          => "--",
+      :slug_method                 => nil
     }
 
     # Whether to allow friendly_id and/or slugs to be nil. This is not
@@ -75,6 +76,10 @@ module FriendlyId
     # Use slugs for storing the friendly_id string.
     attr_accessor :use_slug
     alias :use_slugs= :use_slug
+    
+    # 
+    attr_accessor :slug_method
+    alias :slug_methods= :slug_method
 
     def initialize(configured_class, method, options = nil, &block)
       @configured_class = configured_class

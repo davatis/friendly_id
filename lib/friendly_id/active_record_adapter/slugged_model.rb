@@ -84,10 +84,13 @@ module FriendlyId
         #p 'new slug needed'
         raise "steht schon was anderes drin #{@slug.inspect} - #{locale}" if @slug != nil && !@slug.kind_of?(Hash)
         @slug ||= {} #if @slug == nil
-        #p slug_text
+        # p slug_text
         #p self
-        @slug[locale] = slugs.build :name => slug_text.to_s, :scope => friendly_id_config.scope_for(self),
-          :sluggable => self, :locale => locale
+        # @slug[locale] = slugs.build :name => slug_text.to_s, :scope => friendly_id_config.scope_for(self), 
+        # :sluggable => self, :locale => locale
+        
+        @slug[locale] =  slugs.build :name => slug_text.to_s, :scope => friendly_id_config.scope_for(self), 
+        :sluggable => self, :locale => locale
         #raise @slug.inspect
         #p @slug
         #raise locale.inspect
@@ -96,7 +99,9 @@ module FriendlyId
       end
 
       def save_slugs
-        #p 'save slugs'
+        # p 'save slugs 33'
+        build_a_slug if friendly_id_config.slug_method
+
         if @slug && @slug.kind_of?( Hash )
           #p @slug
           @slug.each do |k, v|
