@@ -15,11 +15,12 @@ module FriendlyId
           extend FriendlyId::ActiveRecordAdapter::Finders unless FriendlyId.on_ar3?
           if friendly_id_config.slug_method == true
             define_method("#{friendly_id_config.method}=") do |*args|
-             #p 'setter'
-             super
-             build_a_slug # if args[0] == friendly_id_config.method.to_s
-           end
-         end
+              #p 'setter'
+              super
+              build_a_slug # if args[0] == friendly_id_config.method.to_s
+            end
+          end
+        end
       end
 
       include FriendlyId::Slugged::Model
