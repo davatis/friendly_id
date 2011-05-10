@@ -30,9 +30,17 @@ module FriendlyId
         !current?
       end
 
+      def locale
+        I18n.locale
+      end
+
       # The slug that was used to find the model.
       def slug
-        @slug ||= record.find_slug(name, sequence)
+        #p 'method :slug in slugged'
+        #raise @slug.inspect if @slug
+        @slug ||= {}
+        @slug[locale] ||= record.find_slug(name, sequence)
+        @slug[locale]
       end
 
     end
@@ -72,6 +80,9 @@ module FriendlyId
 
       # Does the instance have a slug?
       def slug?
+        #p 'no slug'
+        #p slug
+        #p "has slug #{!!slug}"
         !! slug
       end
 
@@ -79,7 +90,11 @@ module FriendlyId
 
       # Get the processed string used as the basis of the friendly id.
       def slug_text
-        base = send(friendly_id_config.method)
+        base = @value || send(friendly_id_config.method) 
+        base =  I18n.with_locale(I18n.default_locale) { send(friendly_id_config.method) } if base.blank?
+        #p 'slug_text'
+        #p I18n.with_locale(I18n.default_locale) { send(friendly_id_config.method) }
+        #p base
         unless base.nil? && friendly_id_config.allow_nil?
           text = normalize_friendly_id(SlugString.new(base))
           SlugString.new(text.to_s).validate_for!(friendly_id_config).to_s
@@ -88,6 +103,8 @@ module FriendlyId
 
       # Has the slug text changed?
       def slug_text_changed?
+        #p "slug_text_changed"
+        #p slug_text != slug.name
         slug_text != slug.name
       end
 
@@ -95,6 +112,7 @@ module FriendlyId
       # new slug?
       def new_slug_needed?
         if friendly_id_config.allow_nil?
+          #p 'nil allowed'
           (!slug? && !slug_text.blank?) || (slug? && slug_text_changed?)
         else
           !slug? || slug_text_changed?

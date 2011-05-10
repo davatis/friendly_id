@@ -11,3 +11,11 @@ require "mocha"
 require "active_support"
 require "friendly_id"
 require "friendly_id/test"
+
+module I18n
+  extend self
+
+  def locale
+    :de
+  end
+end

@@ -104,6 +104,17 @@ module FriendlyId
             string = fragment % [connection.quote(klass.base_class.name), connection.quote(name), seq]
             clause ? clause + " OR #{string}" : string
           end
+          if fc.scope?
+            conditions = if friendly_id_scope
+              scope = connection.quote(friendly_id_scope)
+              "slugs.scope = %s AND (%s)" % [scope, conditions]
+            else
+              "slugs.scope IS NULL AND (%s)" % [conditions]
+            end
+          end
+          # TODO mal refactorn in arel
+          locale = I18n.locale
+          conditions = "slugs.locale = %s AND (%s)" % [connection.quote(locale), conditions]
           sql = "SELECT sluggable_id FROM slugs WHERE (%s)" % conditions
           connection.select_values sql
         end
