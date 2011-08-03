@@ -41,7 +41,7 @@ class Slug < ::ActiveRecord::Base
   # Raise a FriendlyId::SlugGenerationError if the slug name is blank.
   def validate_name
     if name.blank?
-      raise FriendlyId::BlankError.new("slug.name can not be blank.")
+      #raise FriendlyId::BlankError.new("slug.name can not be blank.")
     end
   end
 

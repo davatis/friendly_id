@@ -17,8 +17,8 @@ module FriendlyId
     # @raise FriendlyId::ReservedError
     def validate_for!(config)
       truncate_bytes!(config.max_length)
-      raise FriendlyId::BlankError if empty?
-      raise FriendlyId::ReservedError if config.reserved?(self)
+      #raise FriendlyId::BlankError if empty?
+      #raise FriendlyId::ReservedError if config.reserved?(self)
       self
     end
   end
